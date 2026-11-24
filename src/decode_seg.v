@@ -19,7 +19,7 @@ always @(in)
             4'd7:out=7'b1110000;
             4'd8:out=7'b1111111;
             4'd9:out=7'b1111011;
-            default: out=7'bx;
+            default: out=7'b000000x;
         endcase
     end
 
