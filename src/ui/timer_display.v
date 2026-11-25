@@ -1,4 +1,4 @@
-// 六位数码管并行显示. 段选高电平点亮.
+// 六位数码管并行显示. 共阳极段选低电平点亮.
 module timer_display #(
     parameter integer CLK_FREQ = 50000000,       // 系统时钟频率(Hz)
     parameter integer REFRESH_HZ = 1000          // 每一位的刷新频率(Hz)
@@ -34,11 +34,11 @@ module timer_display #(
   segment SEGMENT4(.out(decoded_seg4), .in(hour_l));
   segment SEGMENT5(.out(decoded_seg5), .in(hour_h));
 
-  assign seg0 = dash_mode ? 7'b0000010 : decoded_seg0;
-  assign seg1 = dash_mode ? 7'b0000010 : decoded_seg1;
-  assign seg2 = dash_mode ? 7'b0000010 : decoded_seg2;
-  assign seg3 = dash_mode ? 7'b0000010 : decoded_seg3;
-  assign seg4 = dash_mode ? 7'b0000010 : decoded_seg4;
-  assign seg5 = dash_mode ? 7'b0000010 : decoded_seg5;
+  assign seg0 = dash_mode ? 7'b0111111 : decoded_seg0;
+  assign seg1 = dash_mode ? 7'b0111111 : decoded_seg1;
+  assign seg2 = dash_mode ? 7'b0111111 : decoded_seg2;
+  assign seg3 = dash_mode ? 7'b0111111 : decoded_seg3;
+  assign seg4 = dash_mode ? 7'b0111111 : decoded_seg4;
+  assign seg5 = dash_mode ? 7'b0111111 : decoded_seg5;
 
 endmodule
