@@ -7,7 +7,7 @@ module segment (
   input [3:0] in;
   output reg [6:0] out;
 
-  always @(in) begin
+  always_comb begin
     case (in)
       4'd0: out = 7'b1111101;
       4'd1: out = 7'b0110000;

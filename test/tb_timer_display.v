@@ -14,14 +14,13 @@ module tb_timer_display;
   reg [3:0] min_h = 4'd4;
   reg [3:0] hour_l = 4'd5;
   reg [3:0] hour_h = 4'd6;
-  wire [6:0] seg;
-  wire [5:0] an;
-  integer i;
+  wire [6:0] seg0, seg1, seg2, seg3, seg4, seg5;
 
   timer_display #(.CLK_FREQ(600), .REFRESH_HZ(100)) dut (
       .clk(clk), .state(state), .blink(blink),
       .sec_l(sec_l), .sec_h(sec_h), .min_l(min_l), .min_h(min_h),
-      .hour_l(hour_l), .hour_h(hour_h), .seg(seg), .an(an)
+      .hour_l(hour_l), .hour_h(hour_h), .seg0(seg0), .seg1(seg1), .seg2(seg2),
+      .seg3(seg3), .seg4(seg4), .seg5(seg5)
   );
 
   always #5 clk = ~clk;
@@ -38,40 +37,32 @@ module tb_timer_display;
     endcase
   endfunction
 
-  task automatic check_digit(input integer index, input logic [6:0] expected_seg);
-    logic [5:0] expected_an;
-    begin
-      expected_an = ~(6'b000001 << index);
-      @(posedge clk);
-      #1;
-      if (an !== expected_an || seg !== expected_seg) begin
-        $display("FAIL (display digit %0d): an=%b seg=%b expected an=%b seg=%b",
-                 index, an, seg, expected_an, expected_seg);
-        $fatal(1);
-      end
-    end
-  endtask
-
   initial begin
-    // 初始状态六位均显示横线, 位选仍按顺序扫描.
-    for (i = 0; i < 6; i = i + 1)
-      check_digit(i, 7'b0000010);
+    #1;
+    if ({seg5, seg4, seg3, seg2, seg1, seg0} !== {6{7'b0000010}}) begin
+      $display("FAIL (initial state should show dashes on all six digits)");
+      $fatal(1);
+    end
 
     // DONE 且 blink=1 显示横线; blink=0 显示时间.
     state = DONE;
     blink = 1'b1;
-    for (i = 0; i < 6; i = i + 1)
-      check_digit(i, 7'b0000010);
+    #1;
+    if ({seg5, seg4, seg3, seg2, seg1, seg0} !== {6{7'b0000010}}) begin
+      $display("FAIL (done blink should show dashes on all six digits)");
+      $fatal(1);
+    end
 
     blink = 1'b0;
     state = COUNTING;
-    check_digit(0, decode(sec_l));
-    check_digit(1, decode(sec_h));
-    check_digit(2, decode(min_l));
-    check_digit(3, decode(min_h));
-    check_digit(4, decode(hour_l));
-    check_digit(5, decode(hour_h));
-    check_digit(0, decode(sec_l));
+    #1;
+    if ({seg5, seg4, seg3, seg2, seg1, seg0} !==
+        {decode(hour_h), decode(hour_l), decode(min_h), decode(min_l), decode(sec_h), decode(sec_l)}) begin
+      $display("FAIL (parallel digit decoding): actual=%b expected=%b",
+               {seg5, seg4, seg3, seg2, seg1, seg0},
+               {decode(hour_h), decode(hour_l), decode(min_h), decode(min_l), decode(sec_h), decode(sec_l)});
+      $fatal(1);
+    end
 
     $display("PASS: timer_display unit tests passed");
     $finish;

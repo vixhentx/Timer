@@ -7,8 +7,7 @@ module tb_timer_top;
 
   reg clk = 1'b0;
   reg [3:0] buttons_n = 4'b1111;
-  wire [6:0] seg;
-  wire [5:0] an;
+  wire [6:0] seg0, seg1, seg2, seg3, seg4, seg5;
 
   timer_top #(
       .CLK_FREQ(1000),
@@ -16,7 +15,8 @@ module tb_timer_top;
       .BUTTON_LONG_PRESS_MS(10),
       .DISPLAY_REFRESH_HZ(100)
   ) dut (
-      .clk(clk), .buttons_n(buttons_n), .seg(seg), .an(an)
+      .clk(clk), .buttons_n(buttons_n), .seg0(seg0), .seg1(seg1), .seg2(seg2),
+      .seg3(seg3), .seg4(seg4), .seg5(seg5)
   );
 
   always #5 clk = ~clk;
@@ -32,7 +32,8 @@ module tb_timer_top;
 
   initial begin
     wait_cycles(4);
-    if (dut.state !== INITIAL || seg !== 7'b0000010 || an === 6'b111111) begin
+    if (dut.state !== INITIAL ||
+        {seg5, seg4, seg3, seg2, seg1, seg0} !== {6{7'b0000010}}) begin
       $display("FAIL (top initialization/display connection)");
       $fatal(1);
     end

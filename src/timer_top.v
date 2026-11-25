@@ -7,8 +7,12 @@ module timer_top #(
 ) (
     input clk,                  // 板载时钟
     input [3:0] buttons_n,      // BTN0~BTN3, 低电平有效
-    output [6:0] seg,           // 数码管段选输出
-    output [5:0] an             // 六位数码管位选输出, 低电平有效
+    output [6:0] seg0,           // 秒低位数码管段输出
+    output [6:0] seg1,           // 秒高位数码管段输出
+    output [6:0] seg2,           // 分低位数码管段输出
+    output [6:0] seg3,           // 分高位数码管段输出
+    output [6:0] seg4,           // 小时低位数码管段输出
+    output [6:0] seg5            // 小时高位数码管段输出
 );
 
   wire tick_1hz;
@@ -83,8 +87,8 @@ module timer_top #(
       .CLK_FREQ(CLK_FREQ), .REFRESH_HZ(DISPLAY_REFRESH_HZ)
   ) DISPLAY(
       .clk(clk), .state(state), .blink(blink), .sec_l(sec_l), .sec_h(sec_h),
-      .min_l(min_l), .min_h(min_h), .hour_l(hour_l), .hour_h(hour_h),
-      .seg(seg), .an(an)
+       .min_l(min_l), .min_h(min_h), .hour_l(hour_l), .hour_h(hour_h),
+       .seg0(seg0), .seg1(seg1), .seg2(seg2), .seg3(seg3), .seg4(seg4), .seg5(seg5)
   );
 
 endmodule

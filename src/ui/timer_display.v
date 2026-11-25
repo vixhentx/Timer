@@ -1,4 +1,4 @@
-// 六位数码管动态扫描显示. 段选高电平点亮, 位选低电平有效.
+// 六位数码管并行显示. 段选高电平点亮.
 module timer_display #(
     parameter integer CLK_FREQ = 50000000,       // 系统时钟频率(Hz)
     parameter integer REFRESH_HZ = 1000          // 每一位的刷新频率(Hz)
@@ -12,48 +12,33 @@ module timer_display #(
     input [3:0] min_h,            // 分高位
     input [3:0] hour_l,           // 小时低位
     input [3:0] hour_h,           // 小时高位
-    output reg [6:0] seg = 7'b0000000, // 七段数码管段选
-    output reg [5:0] an = 6'b111111    // 六位数码管位选(低有效)
+    output [6:0] seg0, // 秒低位
+    output [6:0] seg1, // 秒高位
+    output [6:0] seg2, // 分低位
+    output [6:0] seg3, // 分高位
+    output [6:0] seg4, // 小时低位
+    output [6:0] seg5  // 小时高位
 );
 
-  localparam integer RefreshDiv = CLK_FREQ / (REFRESH_HZ * 6);
   localparam logic [3:0] INITIAL = 4'd0;
   localparam logic [3:0] DONE = 4'd3;
 
-  reg [31:0] refresh_count = 32'd0;
-  reg [2:0] digit = 3'd0;
-  reg [3:0] digit_value;
-  reg dash_mode;
-  wire [6:0] decoded_seg;
+  wire dash_mode = (state == INITIAL) || ((state == DONE) && blink);
+  wire [6:0] decoded_seg0, decoded_seg1, decoded_seg2;
+  wire [6:0] decoded_seg3, decoded_seg4, decoded_seg5;
 
-  segment SEGMENT_DECODER(.out(decoded_seg), .in(digit_value));
+  segment SEGMENT0(.out(decoded_seg0), .in(sec_l));
+  segment SEGMENT1(.out(decoded_seg1), .in(sec_h));
+  segment SEGMENT2(.out(decoded_seg2), .in(min_l));
+  segment SEGMENT3(.out(decoded_seg3), .in(min_h));
+  segment SEGMENT4(.out(decoded_seg4), .in(hour_l));
+  segment SEGMENT5(.out(decoded_seg5), .in(hour_h));
 
-  always_comb begin
-    case (digit)
-      3'd0: digit_value = sec_l;
-      3'd1: digit_value = sec_h;
-      3'd2: digit_value = min_l;
-      3'd3: digit_value = min_h;
-      3'd4: digit_value = hour_l;
-      default: digit_value = hour_h;
-    endcase
-
-    dash_mode = (state == INITIAL) || ((state == DONE) && blink);
-  end
-
-  always @(posedge clk) begin
-    if (refresh_count >= RefreshDiv - 1) begin
-      refresh_count <= 32'd0;
-      digit <= (digit == 3'd5) ? 3'd0 : digit + 1'b1;
-    end else begin
-      refresh_count <= refresh_count + 1'b1;
-    end
-
-    an <= ~(6'b000001 << digit);
-    if (dash_mode)
-      seg <= 7'b0000010;
-    else
-      seg <= decoded_seg;
-  end
+  assign seg0 = dash_mode ? 7'b0000010 : decoded_seg0;
+  assign seg1 = dash_mode ? 7'b0000010 : decoded_seg1;
+  assign seg2 = dash_mode ? 7'b0000010 : decoded_seg2;
+  assign seg3 = dash_mode ? 7'b0000010 : decoded_seg3;
+  assign seg4 = dash_mode ? 7'b0000010 : decoded_seg4;
+  assign seg5 = dash_mode ? 7'b0000010 : decoded_seg5;
 
 endmodule
