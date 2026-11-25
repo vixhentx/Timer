@@ -10,6 +10,8 @@ module tick_generator #(
 
   reg [31:0] second_count = 32'd0;
   reg [31:0] blink_count = 32'd0;
+  localparam integer BLINK_HALF_PERIOD_CYCLES =
+      (CLK_FREQ / 1000) * BLINK_HALF_PERIOD;
 
   always @(posedge clk) begin
     tick_1hz <= 1'b0;
@@ -20,7 +22,7 @@ module tick_generator #(
       second_count <= second_count + 1'b1;
     end
 
-    if (blink_count >= (CLK_FREQ * BLINK_HALF_PERIOD) - 1) begin
+    if (blink_count >= BLINK_HALF_PERIOD_CYCLES - 1) begin
       blink_count <= 32'd0;
       blink <= ~blink;
     end else begin
